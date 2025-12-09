@@ -38,6 +38,7 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.sign
 import kotlinx.coroutines.CoroutineScope
+import com.tencent.kuikly.core.log.KLog
 
 /**
  * Measures and calculates the positions for the requested items. The result is produced
@@ -125,9 +126,14 @@ internal fun measureLazyList(
     } else {
         var currentFirstItemIndex = firstVisibleItemIndex
         var currentFirstItemScrollOffset = firstVisibleItemScrollOffset
+        // 【调试日志】打印测量开始时的输入参数（增强版）
+        KLog.i("LazyList-BugDebug", "measureLazyList START: itemsCount=$itemsCount, firstVisibleItemIndex=$firstVisibleItemIndex, firstVisibleItemScrollOffset=$firstVisibleItemScrollOffset")
+        KLog.i("LazyList-BugDebug", "measureLazyList PARAMS: mainAxisAvailableSize=$mainAxisAvailableSize, beforeContentPadding=$beforeContentPadding, afterContentPadding=$afterContentPadding")
+        KLog.i("LazyList-BugDebug", "measureLazyList SCROLL: scrollToBeConsumed=$scrollToBeConsumed, spaceBetweenItems=$spaceBetweenItems, beyondBoundsItemCount=$beyondBoundsItemCount")
         if (currentFirstItemIndex >= itemsCount) {
             // the data set has been updated and now we have less items that we were
             // scrolled to before
+            KLog.i("LazyList-BugDebug", "measureLazyList: ADJUSTING INDEX! currentFirstItemIndex($currentFirstItemIndex) >= itemsCount($itemsCount), reset to ${itemsCount - 1}")
             currentFirstItemIndex = itemsCount - 1
             currentFirstItemScrollOffset = 0
         }
@@ -398,6 +404,15 @@ internal fun measureLazyList(
         }
         val headerItem = stickingItems.lastOrNull()
 
+        // 【调试日志】打印测量结果（增强版）
+        val visibleIndices = positionedItems.map { it.index }.joinToString(",")
+        val visibleOffsets = positionedItems.map { "${it.index}:offset=${it.offset}" }.joinToString(", ")
+        KLog.i("LazyList-BugDebug", "measureLazyList END: firstItem.index=${firstItem.index}, currentFirstItemScrollOffset=$currentFirstItemScrollOffset")
+        KLog.i("LazyList-BugDebug", "measureLazyList VISIBLE: visibleItems=[$visibleIndices], totalItems=$itemsCount")
+        KLog.i("LazyList-BugDebug", "measureLazyList OFFSETS: $visibleOffsets")
+        KLog.i("LazyList-BugDebug", "measureLazyList LAYOUT: layoutWidth=$layoutWidth, layoutHeight=$layoutHeight, currentMainAxisOffset=$currentMainAxisOffset, maxOffset=$maxOffset")
+        KLog.i("LazyList-BugDebug", "measureLazyList RESULT: canScrollForward=${index < itemsCount || currentMainAxisOffset > maxOffset}, remeasureNeeded=$remeasureNeeded")
+        
         return LazyListMeasureResult(
             firstVisibleItem = firstItem,
             firstVisibleItemScrollOffset = currentFirstItemScrollOffset,

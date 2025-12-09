@@ -15,6 +15,7 @@
 
 #include "libohos_render/expand/components/scroller/KRScrollerView.h"
 
+#include <hilog/log.h>
 #include "libohos_render/expand/components/view/KRView.h"
 #include "libohos_render/foundation/type/KRRenderValue.h"
 #include "libohos_render/utils/KRJSONObject.h"
@@ -408,7 +409,15 @@ void KRScrollerView::SetContentOffset(const KRAnyValue &value) {
     auto animate = content_offset_splits[2]->toBool();
     auto duration = content_offset_splits.size() > 3 ? content_offset_splits[3]->toInt() : 0;
 
+    // 【调试日志】打印 KRScrollerView::SetContentOffset 调用信息
+    auto currentOffset = kuikly::util::GetArkUIScrollContentOffset(GetNode());
+    OH_LOG_Print(LOG_APP, LOG_INFO, 0xFF00, "LazyList-BugDebug",
+        "KRScrollerView::SetContentOffset: offset_x=%{public}f, offset_y=%{public}f, animate=%{public}d, duration=%{public}d, currentOffset=(%{public}f,%{public}f), is_set_frame_=%{public}d",
+        offset_x, offset_y, animate ? 1 : 0, duration, currentOffset.x, currentOffset.y, is_set_frame_ ? 1 : 0);
+
     if (!is_set_frame_) {
+        OH_LOG_Print(LOG_APP, LOG_INFO, 0xFF00, "LazyList-BugDebug",
+            "KRScrollerView::SetContentOffset DEFERRED: frame not set yet, will apply later");
         first_offset_x_ = offset_x;
         first_offset_y_ = offset_y;
         first_animate_ = animate;

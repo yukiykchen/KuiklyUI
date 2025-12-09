@@ -22,6 +22,7 @@ import com.tencent.kuikly.compose.foundation.lazy.layout.findIndexByKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import com.tencent.kuikly.core.log.KLog
 
 /**
  * Contains the current scroll position represented by the first visible item index and the first
@@ -51,6 +52,8 @@ internal class LazyListScrollPosition(
      * Updates the current scroll position based on the results of the last measurement.
      */
     fun updateFromMeasureResult(measureResult: LazyListMeasureResult) {
+        val oldIndex = index
+        val oldScrollOffset = scrollOffset
         lastKnownFirstItemKey = measureResult.firstVisibleItem?.key
         // we ignore the index and offset from measureResult until we get at least one
         // measurement with real items. otherwise the initial index and scroll passed to the
@@ -61,7 +64,13 @@ internal class LazyListScrollPosition(
             check(scrollOffset >= 0f) { "scrollOffset should be non-negative ($scrollOffset)" }
 
             val firstIndex = measureResult.firstVisibleItem?.index ?: 0
+            // 【调试日志】打印状态更新前后的变化
+            if (oldIndex != firstIndex || oldScrollOffset != scrollOffset) {
+                KLog.i("LazyList-BugDebug", "ScrollPosition.updateFromMeasureResult: index $oldIndex->$firstIndex, offset $oldScrollOffset->$scrollOffset, totalItems=${measureResult.totalItemsCount}, visibleCount=${measureResult.visibleItemsInfo.size}")
+            }
             update(firstIndex, scrollOffset)
+        } else {
+            KLog.i("LazyList-BugDebug", "ScrollPosition.updateFromMeasureResult SKIPPED: hadFirstNotEmptyLayout=$hadFirstNotEmptyLayout, totalItemsCount=${measureResult.totalItemsCount}")
         }
     }
 

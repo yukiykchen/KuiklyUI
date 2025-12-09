@@ -39,6 +39,7 @@ internal abstract class BasePager : Pager() {
         val externalModules = hashMapOf<String, Module>()
         externalModules[BridgeModule.MODULE_NAME] = BridgeModule()
         externalModules[TDFTestModule.MODULE_NAME] = TDFTestModule()
+        externalModules[BackgroundTimerModule.MODULE_NAME] = BackgroundTimerModule()
         return externalModules
     }
 

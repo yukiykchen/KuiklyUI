@@ -19,6 +19,7 @@ import { KRMyDemoCustomView } from './components/KRMyDemoCustomView';
 import { KRMyModule } from './modules/KRMyModule';
 import { KRBridgeModule } from './modules/KRBridgeModule';
 import { KROhosStreamRequestModule } from './modules/KROhosStreamRequestModule';
+import { KRBackgroundTimerModule } from './modules/KRBackgroundTimerModule';
 import { KuiklyPageView } from './components/KuiklyPageView';
 
 
@@ -43,6 +44,7 @@ export class KuiklyViewDelegate extends IKuiklyViewDelegate {
 
     map.set(KRMyModule.MODULE_NAME, () => new KRMyModule());
     map.set(KROhosStreamRequestModule.MODULE_NAME, () => new KROhosStreamRequestModule());
+    map.set(KRBackgroundTimerModule.MODULE_NAME, () => new KRBackgroundTimerModule());
     return map;
   }
 

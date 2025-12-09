@@ -15,6 +15,7 @@
 
 #include "libohos_render/utils/KRViewUtil.h"
 
+#include <hilog/log.h>
 #include "libohos_render/export/IKRRenderViewExport.h"
 #include "libohos_render/utils/KRThreadChecker.h"
 
@@ -828,7 +829,13 @@ KRPoint GetArkUIScrollContentOffset(ArkUI_NodeHandle handle) {
 }
 
 void SetArkUIContentOffset(ArkUI_NodeHandle handle, float offset_x, float offset_y, bool animate, int duration) {
+    // 【调试日志】打印 setContentOffset 调用参数
+    OH_LOG_Print(LOG_APP, LOG_INFO, 0xFF00, "LazyList-BugDebug",
+        "SetArkUIContentOffset CALLED: handle=%{public}p, offset_x=%{public}f, offset_y=%{public}f, animate=%{public}d, duration=%{public}d",
+        handle, offset_x, offset_y, animate ? 1 : 0, duration);
+    
     if (!handle) {
+        OH_LOG_Print(LOG_APP, LOG_WARN, 0xFF00, "LazyList-BugDebug", "SetArkUIContentOffset ABORT: handle is null");
         return;
     }
 

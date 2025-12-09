@@ -451,6 +451,12 @@ class LazyListState
             index: Int,
             scrollOffset: Int = 0,
         ) {
+            // 如果页面不在前台,则直接退出
+            val pager = kuiklyInfo.scrollView?.getPager()
+            if (pager != null && !pager.isAppeared) {
+                return
+            }
+            
             kuiklyInfo.offsetDirty = true
             
             // Calculate teleport distance based on viewportSize and average item size

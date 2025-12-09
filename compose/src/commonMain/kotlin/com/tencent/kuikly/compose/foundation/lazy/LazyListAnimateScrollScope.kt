@@ -43,15 +43,45 @@ internal class LazyListAnimateScrollScope(
 
     override fun calculateDistanceTo(targetIndex: Int): Float {
         val layoutInfo = state.layoutInfo
-        if (layoutInfo.visibleItemsInfo.isEmpty()) return 0f
+        println("[LazyList-BugDebug] calculateDistanceTo: targetIndex=$targetIndex, visibleItemsInfo.size=${layoutInfo.visibleItemsInfo.size}")
+        if (layoutInfo.visibleItemsInfo.isEmpty()) {
+            println("[LazyList-BugDebug] calculateDistanceTo: visibleItemsInfo is EMPTY! returning 0f (THIS IS PROBLEMATIC!)")
+            return 0f
+        }
         val visibleItem = layoutInfo.visibleItemsInfo.fastFirstOrNull { it.index == targetIndex }
-        return if (visibleItem == null) {
+        val result = if (visibleItem == null) {
             val averageSize = calculateVisibleItemsAverageSize(layoutInfo)
             val indexesDiff = targetIndex - firstVisibleItemIndex
-            (averageSize * indexesDiff).toFloat() - firstVisibleItemScrollOffset
+            val distance = (averageSize * indexesDiff).toFloat() - firstVisibleItemScrollOffset
+            println("[LazyList-BugDebug] calculateDistanceTo: targetIndex=$targetIndex NOT visible, averageSize=$averageSize, indexesDiff=$indexesDiff, distance=$distance")
+            distance
         } else {
-            visibleItem.offset.toFloat()
+            // 修复 bug: 不能直接返回 offset 作为滚动距离
+            // offset 是 item 相对于视口起点的位置，需要计算实际需要滚动的距离
+            val viewportEndOffset = layoutInfo.viewportEndOffset
+            val itemEndOffset = visibleItem.offset + visibleItem.size
+
+            val distance = when {
+                // item 完全在视口内，不需要滚动
+                visibleItem.offset >= 0 && itemEndOffset <= viewportEndOffset -> {
+                    println("[LazyList-BugDebug] calculateDistanceTo: targetIndex=$targetIndex IS FULLY visible, no scroll needed")
+                    0f
+                }
+                // item 部分超出视口底部，只滚动让它刚好完全可见的距离
+                itemEndOffset > viewportEndOffset -> {
+                    val scrollDistance = (itemEndOffset - viewportEndOffset).toFloat()
+                    println("[LazyList-BugDebug] calculateDistanceTo: targetIndex=$targetIndex PARTIALLY visible (bottom), scrollDistance=$scrollDistance")
+                    scrollDistance
+                }
+                // item 部分超出视口顶部（offset < 0），需要往回滚动
+                else -> {
+                    println("[LazyList-BugDebug] calculateDistanceTo: targetIndex=$targetIndex PARTIALLY visible (top), scrollDistance=${visibleItem.offset}")
+                    visibleItem.offset.toFloat()
+                }
+            }
+            distance
         }
+        return result
     }
 
     override suspend fun scroll(block: suspend ScrollScope.() -> Unit) {

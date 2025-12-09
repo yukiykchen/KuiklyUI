@@ -157,8 +157,10 @@ internal suspend fun LazyLayoutAnimateScrollScope.animateScrollToItem(
             }
 
             var loops = 1
+            println("[LazyList-BugDebug] animateScrollToItem LOOP START: index=$index, forward=$forward, firstVisibleItemIndex=$firstVisibleItemIndex, lastVisibleItemIndex=$lastVisibleItemIndex")
             while (loop && itemCount > 0) {
                 val expectedDistance = calculateDistanceTo(index) + scrollOffset
+                println("[LazyList-BugDebug] Loop #$loops: expectedDistance=$expectedDistance, firstVisibleItemIndex=$firstVisibleItemIndex, lastVisibleItemIndex=$lastVisibleItemIndex")
                 val target = if (abs(expectedDistance) < targetDistancePx) {
                     val absTargetPx = maxOf(abs(expectedDistance), minDistancePx)
                     if (forward) absTargetPx else -absTargetPx
@@ -174,13 +176,13 @@ internal suspend fun LazyLayoutAnimateScrollScope.animateScrollToItem(
 
                 anim = anim.copy(value = 0f)
                 var prevValue = 0f
-                
+
                 // Calculate animation duration based on distance and loop count
                 val targetDistance = abs(target)
                 val isShortDistance = targetDistance < targetDistancePx
                 val isFirstLoop = loops == 1
                 val isLastLoop = abs(expectedDistance) < targetDistancePx
-                
+
                 val durationMillis = when {
                     // Short distance scenario
                     isShortDistance -> when {
@@ -191,7 +193,7 @@ internal suspend fun LazyLayoutAnimateScrollScope.animateScrollToItem(
                     // Long distance scenario 3: fixed 125ms to ensure total duration is controllable
                     else -> 125
                 }
-                
+
                 val animationSpec = tween<Float>(
                     durationMillis = durationMillis,
                     easing = LinearEasing
@@ -239,26 +241,28 @@ internal suspend fun LazyLayoutAnimateScrollScope.animateScrollToItem(
                             }
 
                             if (forward) {
-                                if (
-                                    loops >= 2 &&
-                                    index - lastVisibleItemIndex > numOfItemsForTeleport
-                                ) {
+                                val teleportCondition = loops >= 2 && index - lastVisibleItemIndex > numOfItemsForTeleport
+                                println("[LazyList-BugDebug] Teleport check (forward): loops=$loops, index=$index, lastVisibleItemIndex=$lastVisibleItemIndex, numOfItemsForTeleport=$numOfItemsForTeleport, diff=${index - lastVisibleItemIndex}, willTeleport=$teleportCondition")
+                                if (teleportCondition) {
                                     // Teleport
                                     debugLog { "Teleport forward" }
+                                    val teleportIndex = index - numOfItemsForTeleport
+                                    println("[LazyList-BugDebug] >>> TELEPORT FORWARD! snapToItem(index=$teleportIndex, scrollOffset=0)")
                                     snapToItem(
-                                        index = index - numOfItemsForTeleport,
+                                        index = teleportIndex,
                                         scrollOffset = 0
                                     )
                                 }
                             } else {
-                                if (
-                                    loops >= 2 &&
-                                    firstVisibleItemIndex - index > numOfItemsForTeleport
-                                ) {
+                                val teleportCondition = loops >= 2 && firstVisibleItemIndex - index > numOfItemsForTeleport
+                                println("[LazyList-BugDebug] Teleport check (backward): loops=$loops, index=$index, firstVisibleItemIndex=$firstVisibleItemIndex, numOfItemsForTeleport=$numOfItemsForTeleport, diff=${firstVisibleItemIndex - index}, willTeleport=$teleportCondition")
+                                if (teleportCondition) {
                                     // Teleport
                                     debugLog { "Teleport backward" }
+                                    val teleportIndex = index + numOfItemsForTeleport
+                                    println("[LazyList-BugDebug] >>> TELEPORT BACKWARD! snapToItem(index=$teleportIndex, scrollOffset=0)")
                                     snapToItem(
-                                        index = index + numOfItemsForTeleport,
+                                        index = teleportIndex,
                                         scrollOffset = 0
                                     )
                                 }
