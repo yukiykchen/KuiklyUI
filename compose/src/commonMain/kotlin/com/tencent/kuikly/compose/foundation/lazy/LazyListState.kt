@@ -452,10 +452,10 @@ class LazyListState
             scrollOffset: Int = 0,
         ) {
             // 如果页面不在前台,则直接退出
-            val pager = kuiklyInfo.scrollView?.getPager()
-            if (pager != null && !pager.isAppeared) {
-                return
-            }
+//            val pager = kuiklyInfo.scrollView?.getPager()
+//            if (pager != null && !pager.isAppeared) {
+//                return
+//            }
             
             kuiklyInfo.offsetDirty = true
             
