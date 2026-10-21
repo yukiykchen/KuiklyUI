@@ -129,8 +129,17 @@ internal class KNode<T : DeclarativeBaseView<*, *>>(
     }
 
     override fun attach(owner: Owner) {
+        syncPagerContextFromParent()
         super.attach(owner)
         runUpdate()
+    }
+
+    private fun syncPagerContextFromParent() {
+        if (view.pagerId.isEmpty()) {
+            (parent as? KNode<*>)?.view?.pagerId?.takeIf { it.isNotEmpty() }?.let {
+                view.pagerId = it
+            }
+        }
     }
 
     override fun detach() {
@@ -179,6 +188,9 @@ internal class KNode<T : DeclarativeBaseView<*, *>>(
     // Construct Kuikly node tree
     fun insertTopDown(index: Int, instance: KNode<DeclarativeBaseView<*, *>>) {
         val childView = instance.view
+        if (childView.pagerId.isEmpty() && view.pagerId.isNotEmpty()) {
+            childView.pagerId = view.pagerId
+        }
         if (instance.isInitialized) {
             // Reinsertion (movableContent move): skip init, do lightweight re-registration.
             // renderView is still alive (removeDomSubViewForMove preserved it), so

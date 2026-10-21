@@ -20,6 +20,7 @@ import com.tencent.kuikly.core.collection.fastHashMapOf
 import com.tencent.kuikly.core.exception.throwRuntimeError
 import com.tencent.kuikly.core.layout.Frame
 import com.tencent.kuikly.core.layout.MutableFrame
+import com.tencent.kuikly.core.manager.BridgeManager
 import com.tencent.kuikly.core.manager.PagerManager
 import com.tencent.kuikly.core.module.CallbackFn
 import com.tencent.kuikly.core.module.Module
@@ -62,21 +63,36 @@ abstract class DeclarativeBaseView<A : Attr, E : Event> : AbstractBaseView<A, E>
     }
 
     override fun attr(init: A.() -> Unit) {
-        if (pagerId.isEmpty()) {
+        val viewPagerId = pagerId
+        if (viewPagerId.isEmpty()) {
             return
         }
-        val observable = ReactiveObserver.bindValueChange(this) { isFirst ->
-            attr.apply {
-                if (isFirst) {
-                    apply(init)
-                } else {
-                    beginApplyAttrProperty()
-                    apply(init)
-                    endApplyAttrProperty()
+        val observable = withPagerContext(viewPagerId) {
+            ReactiveObserver.bindValueChange(this) { isFirst ->
+                withPagerContext(viewPagerId) {
+                    attr.apply {
+                        if (isFirst) {
+                            apply(init)
+                        } else {
+                            beginApplyAttrProperty()
+                            apply(init)
+                            endApplyAttrProperty()
+                        }
+                    }
                 }
             }
         }
         attr.isStaticAttr = !observable
+    }
+
+    private inline fun <T> withPagerContext(viewPagerId: String, block: () -> T): T {
+        val previousPageId = BridgeManager.currentPageId
+        BridgeManager.currentPageId = viewPagerId
+        return try {
+            block()
+        } finally {
+            BridgeManager.currentPageId = previousPageId
+        }
     }
 
     open fun willMoveToParentComponent() {

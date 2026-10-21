@@ -147,6 +147,8 @@ open class ComposeContainer :
         pageData: JSONObject,
     ) {
         super.onCreatePager(pagerId, pageData)
+        // rootKView is attached before Pager.onCreatePager assigns the Pager ID.
+        rootKView.pagerId = pagerId
 
         val frame =
             Frame(

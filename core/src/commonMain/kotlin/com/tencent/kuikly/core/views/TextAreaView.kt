@@ -328,7 +328,7 @@ open class TextAreaAttr : Attr() {
     }
 
     fun fontSize(size: Float, scaleFontSizeEnable: Boolean? = null): TextAreaAttr {
-        TextConst.FONT_SIZE with FontModule.scaleFontSize(size, scaleFontSizeEnable)
+        TextConst.FONT_SIZE with FontModule.scaleFontSize(size, scaleFontSizeEnable, pagerId)
         return this
     }
 

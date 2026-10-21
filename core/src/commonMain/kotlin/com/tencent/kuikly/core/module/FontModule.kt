@@ -46,6 +46,18 @@ class FontModule : Module() {
 
         fun scaleFontSize(fontSize: Float, scaleFontSizeEnable: Boolean? = null): Float {
             val pager = PagerManager.getCurrentPager()
+            return scaleFontSize(fontSize, scaleFontSizeEnable, pager)
+        }
+
+        fun scaleFontSize(fontSize: Float, scaleFontSizeEnable: Boolean?, pagerId: String): Float {
+            return scaleFontSize(fontSize, scaleFontSizeEnable, PagerManager.getPager(pagerId))
+        }
+
+        private fun scaleFontSize(
+            fontSize: Float,
+            scaleFontSizeEnable: Boolean?,
+            pager: com.tencent.kuikly.core.pager.IPager,
+        ): Float {
             var enable = pager.scaleFontSizeEnable()
             if (scaleFontSizeEnable != null) {
                 enable = scaleFontSizeEnable

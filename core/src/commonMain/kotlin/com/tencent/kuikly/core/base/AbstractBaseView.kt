@@ -88,15 +88,20 @@ abstract class AbstractBaseView<A : Attr, E : Event> : BaseObject(), IViewPublic
     val nativeRef: Int = ++nativeRefProducer
     var parentRef: Int = 0
     override var pagerId: String = ""
+        set(value) {
+            field = value
+            _attr?.pagerId = value
+            _event?.pagerId = value
+        }
     protected var layoutFrame = Frame.zero
     override val frame: Frame
         get() = flexNode.layoutFrame
-    protected val attr: A by lazy(LazyThreadSafetyMode.NONE) {
-        internalCreateAttr()
-    }
-    protected val event: E by lazy(LazyThreadSafetyMode.NONE) {
-        internalCreateEvent()
-    }
+    private var _attr: A? = null
+    protected val attr: A
+        get() = _attr ?: internalCreateAttr().also { _attr = it }
+    private var _event: E? = null
+    protected val event: E
+        get() = _event ?: internalCreateEvent().also { _event = it }
     val flexNode = FlexNode()
     var renderView: RenderView? = null
     private val renderViewLazyTasks: MutableList<() -> Unit> by lazy(LazyThreadSafetyMode.NONE) {

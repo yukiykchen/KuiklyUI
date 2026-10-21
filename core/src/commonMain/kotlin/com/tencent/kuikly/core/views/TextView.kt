@@ -259,7 +259,7 @@ open class TextAttr : Attr() {
      * @param scaleFontSizeEnable 是否允许端侧随宿主字体模式缩放，默认根据Pager.scaleFontSizeEnable() 返回值决定（业务可通过Pager重写该方式统一页面生效）
      */
     open fun fontSize(size: Float, scaleFontSizeEnable: Boolean? = null): TextAttr {
-        TextConst.FONT_SIZE with (FontModule.scaleFontSize(size, scaleFontSizeEnable))
+        TextConst.FONT_SIZE with (FontModule.scaleFontSize(size, scaleFontSizeEnable, pagerId))
         letterSpacing?.also {
             letterSpacing(it)
         }

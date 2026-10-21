@@ -195,7 +195,7 @@ class InputAttr : Attr() {
     }
 
     fun fontSize(size: Float, scaleFontSizeEnable: Boolean? = null): InputAttr {
-        TextConst.FONT_SIZE with FontModule.scaleFontSize(size, scaleFontSizeEnable)
+        TextConst.FONT_SIZE with FontModule.scaleFontSize(size, scaleFontSizeEnable, pagerId)
         return this
     }
 
